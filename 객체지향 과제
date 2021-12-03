@@ -1,0 +1,471 @@
+#define _CRT_SECURE_NO_WARNINGS
+using namespace std;
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stdlib.h>
+#include <time.h>
+
+double rand_fever()
+{
+    srand(time(NULL));
+    return (rand() % ((390 - 360) + 1) + 360) / (double)10;
+}
+
+struct m_t {
+    int hour;
+    int min;
+    m_t() :hour(0), min(0) {};
+    m_t(int _h, int _m) : hour(_h), min(_m) {};
+};
+
+//국민 한명의 정보를 담는 클래스 선언
+class person {
+private:
+    string n;
+    string p;
+    double f;
+public:
+    //생성자
+    person(string name, string phone, double fever)
+    {
+        setName(name);
+        setPhone(phone);
+        setFever(fever);
+    }
+
+    //Getter와 Setter
+    void setName(string name) {
+        n = name;
+    }
+    void setPhone(string phone) {
+        p = phone;
+    }
+    void setFever(double fever) {
+        f = fever;
+    }
+
+    string getName() {
+        return n;
+    }
+    string getPhone() {
+        return p;
+    }
+    double getFever() {
+        return f;
+    }
+
+    //오버라이딩시킬 함수
+    string toString()
+    {
+        string name = "이름 : " + getName() + "\n";
+        string phone = "전화번호 : " + getPhone() + "\n";
+        string fever = "체온 : " + to_string(getFever()) + "\n";
+        string result = name + phone + fever;
+        return result;
+    }
+};
+
+//각 기관(=카페, 식당, 병원 등)의 부모 클래스 선언
+//각 기관별 지켜야하는 영업시간이나 다른 내용은 자식에서 오버라이딩 또는 새로 선언(=toString과 같은)
+//각 기관의 공통사항은 부모클래스에서 선언
+class org {
+private:
+    string n;
+    string a;
+    string p;
+    m_t open;
+    m_t close;
+    bool r;
+    string r_d;
+
+public:
+    vector<person> p_list;
+
+    //생성자 오버로딩
+    org()
+    {
+        setName("");
+        setAddr("");
+        setPhone("");
+        m_t o(0, 0);
+        setOpen(o);
+
+        m_t c(0, 0);
+        setClose(c);
+        setRuleFollow(true);
+    }
+
+    //생성자 오버로딩
+    org(string name, string addr, string phone, m_t o, m_t c, bool r)
+    {
+        setName(name);
+        setAddr(addr);
+        setPhone(phone);
+        setOpen(o);
+        setClose(c);
+        setRuleFollow(r);
+    }
+
+    //Getter와 Setter
+    void setName(string name)
+    {
+        n = name;
+    }
+
+    void setAddr(string addr)
+    {
+        a = addr;
+    }
+
+    void setPhone(string phone)
+    {
+        p = phone;
+    }
+
+    void setRuleFollow(bool rule)
+    {
+        r = rule;
+    }
+
+    void setRuleDescription(string rule_description)
+    {
+        r_d = rule_description;
+    }
+
+    void setOpen(m_t o)
+    {
+        if (0 > o.hour || o.hour >= 24 || 0 > o.min || o.min >= 60)
+        {
+            cout << "ERROR : setOpen() :시간은 0시 ~ 23시, 분은 0분 ~ 59분까지 가능합니다." << endl;
+            return;
+        }
+        open = o;
+    }
+
+    void setClose(m_t c)
+    {
+        if (0 > c.hour || c.hour >= 24 || 0 > c.min || c.min >= 60)
+        {
+            cout << "ERROR : setClose() :시간은 0시 ~ 23시, 분은 0분 ~ 59분까지 가능합니다." << endl;
+            return;
+        }
+        close = c;
+    }
+
+    string getName() {
+        return n;
+    }
+
+    string getAddr() {
+        return a;
+    }
+
+    string getPhone() {
+        return p;
+    }
+
+    m_t getOpen() {
+        return open;
+    }
+
+    m_t getClose() {
+        return close;
+    }
+
+    bool getRuleFollow() {
+        return r;
+    }
+
+    string getRuleDescription() {
+        return r_d;
+    }
+
+    //오버라이딩
+    virtual string toString()
+    {
+        string name = "상호명 : " + getName() + "\n";
+        string addr = "주소 : " + getAddr() + "\n";
+        string phone = "전화번호 : " + getPhone() + "\n";
+        string open = "개점시간 : " + to_string(getOpen().hour) + ", Min : " + to_string(getOpen().min) + "\n";
+        string close = "폐점시간 : " + to_string(getClose().hour) + ", Min : " + to_string(getClose().min) + "\n";
+        string ruleD = "Rule : " + getRuleDescription() + "\n";
+        string result = name + addr + phone + open + close;
+        if (getRuleFollow())
+            result += ruleD;
+        return result;
+    }
+};
+
+class cafe : public org {
+private:
+    m_t open_rule;
+    m_t close_rule;
+public:
+    //생성자
+    cafe(string name, string addr, string phone, m_t o, m_t c, m_t o_r, m_t c_r, bool r) : org(name, addr, phone, o, c, r) {
+        open_rule = o_r;
+        close_rule = c_r;
+    }
+
+    //Getter와 Setter
+    void setOpenRule(m_t o)
+    {
+        if (0 > o.hour || o.hour >= 24 || 0 > o.min || o.min >= 60)
+        {
+            cout << "ERROR : setOpen() :시간은 0시 ~ 23시, 분은 0분 ~ 59분까지 가능합니다." << endl;
+            return;
+        }
+        open_rule = o;
+    }
+
+    void setCloseRule(m_t c)
+    {
+        if (0 > c.hour || c.hour >= 24 || 0 > c.min || c.min >= 60)
+        {
+            cout << "ERROR : setClose() :시간은 0시 ~ 23시, 분은 0분 ~ 59분까지 가능합니다." << endl;
+            return;
+        }
+        close_rule = c;
+    }
+    m_t getOpen() {
+        return open_rule;
+    }
+
+    m_t getClose() {
+        return close_rule;
+    }
+
+    //오버라이딩
+    virtual string toString()
+    {
+        string name = "상호명 : " + getName() + "\n";
+        string addr = "주소 : " + getAddr() + "\n";
+        string phone = "전화번호 : " + getPhone() + "\n";
+        string result = name + addr + phone;
+        if (getRuleFollow())
+        {
+            string open = "Open Hour : " + to_string(open_rule.hour) + ", Min : " + to_string(open_rule.min) + "\n";
+            string close = "Close Hour : " + to_string(close_rule.hour) + ", Min : " + to_string(close_rule.min) + "\n";
+
+            string ruleD = "Rule : " + getRuleDescription() + "\n";
+            result += (open + close + ruleD);
+        }
+        else
+        {
+            string open = "Open Hour : " + to_string(getOpen().hour) + ", Min : " + to_string(getOpen().min) + "\n";
+            string close = "Close Hour : " + to_string(getClose().hour) + ", Min : " + to_string(getClose().min) + "\n";
+
+            result += (open + close);
+        }
+        return result;
+    }
+};
+
+class hospital : public org {
+public:
+    hospital(string name, string addr, string phone, m_t o, m_t c, bool r) : org(name, addr, phone, o, c, r) {
+    }
+};
+
+class restaurant : public org {
+private:
+    m_t open_rule;
+    m_t close_rule;
+public:
+    //생성자
+    restaurant(string name, string addr, string phone, m_t o, m_t c, m_t o_r, m_t c_r, bool r) : org(name, addr, phone, o, c, r) {
+        open_rule = o_r;
+        close_rule = c_r;
+    }
+
+    //Getter와 Setter
+    void setOpenRule(m_t o)
+    {
+        if (0 > o.hour || o.hour >= 24 || 0 > o.min || o.min >= 60)
+        {
+            cout << "ERROR : setOpen() :시간은 0시 ~ 23시, 분은 0분 ~ 59분까지 가능합니다." << endl;
+            return;
+        }
+        open_rule = o;
+    }
+
+    void setCloseRule(m_t c)
+    {
+        if (0 > c.hour || c.hour >= 24 || 0 > c.min || c.min >= 60)
+        {
+            cout << "ERROR : setClose() :시간은 0시 ~ 23시, 분은 0분 ~ 59분까지 가능합니다." << endl;
+            return;
+        }
+        close_rule = c;
+    }
+    m_t getOpen() {
+        return open_rule;
+    }
+
+    m_t getClose() {
+        return close_rule;
+    }
+
+    //오버라이딩
+    virtual string toString()
+    {
+        string name = "Name : " + getName() + "\n";
+        string addr = "Addr : " + getAddr() + "\n";
+        string phone = "Phone : " + getPhone() + "\n";
+        string result = name + addr + phone;
+        if (getRuleFollow())
+        {
+            string open = "Open Hour : " + to_string(open_rule.hour) + ", Min : " + to_string(open_rule.min) + "\n";
+            string close = "Close Hour : " + to_string(close_rule.hour) + ", Min : " + to_string(close_rule.min) + "\n";
+
+            string ruleD = "Rule : " + getRuleDescription() + "\n";
+            result += (open + close + ruleD);
+        }
+        else
+        {
+            string open = "Open Hour : " + to_string(getOpen().hour) + ", Min : " + to_string(getOpen().min) + "\n";
+            string close = "Close Hour : " + to_string(getClose().hour) + ", Min : " + to_string(getClose().min) + "\n";
+
+            result += (open + close);
+        }
+        return result;
+    }
+};
+
+string name;
+string phone;
+double r_fever;
+
+int visit = -1;
+
+void UserMode(vector<org*>* ORG) {
+    int control = -1;
+
+    while (true)
+    {
+        control = -1;
+
+        cout << "명령어를 선택해주세요." << endl;
+        cout << "1. 방문" << endl;
+        cout << "0. 종료" << endl;
+        cout << "Input : " << endl;
+        cin >> control;
+
+        if (control == 1)
+        {
+            cout << "이름을 입력해주세요." << endl;
+            cout << "Name : ";
+            cin >> name;
+
+            cout << "전화번호를 입력해주세요." << endl;
+            cout << "Phone : ";
+            cin >> phone;
+
+            r_fever = rand_fever();
+            if (r_fever > 37.5)
+            {
+                cout << "체온은 " << r_fever << "도 입니다." << endl;
+                cout << "체온이 37.5이상 이므로 출입이 불가합니다." << endl;
+                cout << endl;
+                continue;
+            }
+
+            cout << "체온은 " << r_fever << "도 입니다." << endl;
+            cout << endl;
+            for (int i = 0; i < ORG->size(); i++)
+                cout << i + 1 << "번  " << ORG->at(i)->toString().c_str() << endl;
+
+            visit = -1;
+            cout << "방문하실 곳을 입력해주세요." << endl;
+            cout << "Input : ";
+            cin >> visit;
+
+            ORG->at(visit - 1)->p_list.push_back(*(new person(name, phone, r_fever)));
+        }
+        else if (control == 0)
+            break;
+    }
+}
+
+
+void ManagerMode(vector<org*>* ORG) {
+    int control = -1;
+    while (true)
+    {
+        control = -1;
+
+        cout << "명령어를 선택해주세요." << endl;
+        cout << "1. 전체 기관 출력" << endl;
+        cout << "0. 종료" << endl;
+        cout << "Input : ";
+        cin >> control;
+
+        if (control == 1)
+        {
+            for (int i = 0; i < ORG->size(); i++)
+                cout << i + 1 << "번  " << (ORG->at(i)->toString()).c_str() << endl;
+
+            int select = -1;
+            cout << "보고싶은 방문자 명단 리스트를 선택해주세요." << endl;
+            cout << "Input : ";
+            cin >> select;
+
+            for (int i = 0; i < ORG->at(select - 1)->p_list.size(); i++)
+                cout << i + 1 << "번 " << ORG->at(select - 1)->p_list[i].toString().c_str() << endl;
+            cout << endl;
+        }
+        else if (control == 0)
+            break;
+        else
+            cout << "입력은 1, 2, 0만 가능합니다." << endl;
+    }
+}
+
+int main()
+{
+    //다형성
+    vector<org*> ORG;
+    m_t o_1(9, 0);
+    m_t c_1(18, 0);
+    org* h1 = new hospital("한밭병원", "대전광역시 유성구 동서대로125", "0000-0000", o_1, c_1, false);
+
+    m_t o_2(9, 0);
+    m_t c_2(23, 0);
+    m_t o_r_2(10, 0);
+    m_t c_r_2(23, 0);
+    org* c1 = new cafe("한밭카페", "대전광역시 유성구 동서대로126", "1111-1111", o_2, c_2, o_r_2, c_r_2, true);
+
+    m_t o_3(9, 0);
+    m_t c_3(23, 0);
+    m_t o_r_3(13, 0);
+    m_t c_r_3(23, 0);
+    org* r1 = new cafe("한밭식당", "대전광역시 유성구 동서대로127", "2222-2222", o_3, c_3, o_r_3, c_r_3, true);
+
+    ORG.push_back(h1);
+    ORG.push_back(c1);
+    ORG.push_back(r1);
+
+    int u_or_m = -1;
+    while (true)
+    {
+        u_or_m = -1;
+
+        cout << "유저모드와 관리자 모드를 선택해주세요." << endl;
+        cout << "1. 유저모드" << endl;
+        cout << "2. 관리자모드" << endl;
+        cout << "0. 종료" << endl;
+        cout << "Input : ";
+        cin >> u_or_m;
+
+        if (u_or_m == 1)
+            UserMode(&ORG);
+        else if (u_or_m == 2)
+            ManagerMode(&ORG);
+        else if (u_or_m == 0)
+            return 0;
+        else
+            cout << "입력은 1, 2, 0만 가능합니다." << endl;
+    }
+    return 0;
+}
